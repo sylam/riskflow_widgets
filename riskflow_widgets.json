@@ -1,0 +1,5 @@
+{
+  "load_extensions": {
+    "riskflow_widgets/extension": true
+  }
+}
