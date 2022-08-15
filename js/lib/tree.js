@@ -64,7 +64,7 @@ var TreeView = widgets.DOMWidgetView.extend({
     },
 
     update: function() {
-        if (!this.loaded) {
+        if (!this.loaded && this.model.get('value')) {
             var tree = this.$tree;
             var data = $.parseJSON(this.model.get('value'));
             // console.log('value', data);
@@ -160,13 +160,13 @@ var TreeModel = widgets.DOMWidgetModel.extend({
         _model_module_version : '0.1.0',
         _view_module_version : '0.1.0',
 
-        value : '[]',
-        type_data : '{}',
-        selected : '[]',
-        created : '[]',
-        deleted : '[]',
+        value : '',
+        type_data : '',
+        selected : '',
+        created : '',
+        deleted : '',
         plugins: [],
-        context_menu: '{}'
+        context_menu: ''
     })
 });
 

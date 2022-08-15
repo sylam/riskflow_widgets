@@ -47,6 +47,7 @@ setup_args = dict(
     include_package_data=True,
     install_requires=[
         'ipywidgets>=7.6.0',
+        'ipysheet>=0.5.0',
     ],
     packages=find_packages(),
     zip_safe=False,

@@ -28,10 +28,10 @@ class Tree(widgets.DOMWidget):
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`
     # is automatically synced to the frontend *any* time it changes in Python.
     # It is synced back to Python from the frontend *any* time the model is touched.
-    value = Unicode('[]').tag(sync=True)
-    type_data = Unicode('{}').tag(sync=True)
-    selected = Unicode('[]').tag(sync=True)
-    created = Unicode('[]').tag(sync=True)
-    deleted = Unicode('[]').tag(sync=True)
+    value = Unicode('').tag(sync=True)
+    type_data = Unicode('').tag(sync=True)
+    selected = Unicode('').tag(sync=True)
+    created = Unicode('').tag(sync=True)
+    deleted = Unicode('').tag(sync=True)
     plugins = List([]).tag(sync=True)
-    context_menu = Unicode('{}').tag(sync=True)
+    context_menu = Unicode('').tag(sync=True)
