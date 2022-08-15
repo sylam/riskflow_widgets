@@ -53,6 +53,7 @@ var TreeView = widgets.DOMWidgetView.extend({
 
     perform_update: function ( tree, data, type_data ) {
         var context_menu = $.parseJSON(this.model.get('context_menu'));
+        // console.log('context_menu',context_menu);
         var self = this;
 
         tree.jstree({
@@ -66,8 +67,9 @@ var TreeView = widgets.DOMWidgetView.extend({
         if (!this.loaded) {
             var tree = this.$tree;
             var data = $.parseJSON(this.model.get('value'));
+            // console.log('value', data);
             var type_data = $.parseJSON(this.model.get('type_data'));
-
+            // console.log('type_data', type_data);
             //var self = this;
 
             this.perform_update(tree, data, type_data);
@@ -78,7 +80,7 @@ var TreeView = widgets.DOMWidgetView.extend({
 
             //tree is now loaded
             this.loaded=true;
-            console.log ('loaded data and type data');
+            // console.log ('loaded data and type data');
         }
 
         //We can only create the tree once via an update
@@ -122,8 +124,8 @@ var TreeView = widgets.DOMWidgetView.extend({
         if (obj!=null) {
             //console.log(obj.node);
             this.model.set('selected', this.get_json_path(obj) );
+            this.touch();
         }
-        this.touch();
     },
 
     // Callback for when the user creates a new node
@@ -135,8 +137,8 @@ var TreeView = widgets.DOMWidgetView.extend({
                 this.$tree.jstree("rename_node", obj.node, obj.node.data+"."+obj.node.text);
             }
             this.model.set('created', this.get_json_path(obj) );
+            this.touch();
         }
-        this.touch();
     },
 
     // Callback for when the user deletes a node
@@ -144,8 +146,8 @@ var TreeView = widgets.DOMWidgetView.extend({
         if (obj!=null) {
             //console.log('Delete',obj.node);
             this.model.set('deleted', this.get_json_path(obj));
+            this.touch();
         }
-        this.touch();
     }
 });
 
@@ -158,13 +160,13 @@ var TreeModel = widgets.DOMWidgetModel.extend({
         _model_module_version : '0.1.0',
         _view_module_version : '0.1.0',
 
-        value : '',
-        type_data : '',
-        selected : '',
-        created : '',
-        deleted : '',
+        value : '[]',
+        type_data : '{}',
+        selected : '[]',
+        created : '[]',
+        deleted : '[]',
         plugins: [],
-        context_menu: ''
+        context_menu: '{}'
     })
 });
 
