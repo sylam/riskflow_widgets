@@ -35,3 +35,25 @@ class Tree(widgets.DOMWidget):
     deleted = Unicode('').tag(sync=True)
     plugins = List([]).tag(sync=True)
     context_menu = Unicode('').tag(sync=True)
+
+
+# HandsonTable view
+@widgets.register
+class Table(widgets.DOMWidget):
+    _view_name = Unicode('TableView').tag(sync=True)
+    _model_name = Unicode('TableModel').tag(sync=True)
+    # Name of the front-end module containing widget view
+    _view_module = Unicode('riskflow_widgets').tag(sync=True)
+
+    # Name of the front-end module containing widget model
+    _model_module = Unicode('riskflow_widgets').tag(sync=True)
+
+    # Version of the front-end module containing widget view
+    _view_module_version = Unicode('^0.1.0').tag(sync=True)
+    # Version of the front-end module containing widget model
+    _model_module_version = Unicode('^0.1.0').tag(sync=True)
+
+    colTypes = Unicode().tag(sync=True)
+    colHeaders = List([]).tag(sync=True)
+    value = Unicode().tag(sync=True)
+    description = Unicode().tag(sync=True)

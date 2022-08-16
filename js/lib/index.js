@@ -1,3 +1,4 @@
+require('handsontable/dist/handsontable.full.css');
 require('jstree/dist/themes/default/style.css');
 require('./theme/style.css');
 
@@ -5,7 +6,8 @@ require('./theme/style.css');
 module.exports = {};
 
 var loadedModules = [
-    require("./tree.js")
+    require("./tree.js"),
+    require("./table.js")
 ];
 
 for (var i in loadedModules) {
