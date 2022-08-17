@@ -50,7 +50,6 @@ var TableView = widgets.DOMWidgetView.extend({
                           // when working in HoT, don't listen for command mode keys
                           afterSelection: function(){ IPython.keyboard_manager.disable(); },
                           afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-                          //colHeaders is now an object with the headers and the row autocomplete metadata
                           colHeaders: view.colHeaders,
                           columns: view.colTypes,
                           startCols : view.colHeaders.length,

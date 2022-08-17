@@ -30,11 +30,12 @@ class Tree(widgets.DOMWidget):
     # It is synced back to Python from the frontend *any* time the model is touched.
     value = Unicode('').tag(sync=True)
     type_data = Unicode('').tag(sync=True)
-    selected = Unicode('').tag(sync=True)
-    created = Unicode('').tag(sync=True)
-    deleted = Unicode('').tag(sync=True)
+    selected = List([]).tag(sync=True)
+    created = List([]).tag(sync=True)
+    deleted = List([]).tag(sync=True)
     plugins = List([]).tag(sync=True)
-    context_menu = Unicode('').tag(sync=True)
+    checked = List([]).tag(sync=True)
+    settings = Unicode('').tag(sync=True)
 
 
 # HandsonTable view
@@ -57,3 +58,31 @@ class Table(widgets.DOMWidget):
     colHeaders = List([]).tag(sync=True)
     value = Unicode().tag(sync=True)
     description = Unicode().tag(sync=True)
+
+
+@widgets.register
+class Flot(widgets.DOMWidget):
+    _view_name = Unicode('FlotView').tag(sync=True)
+    _model_name = Unicode('FlotModel').tag(sync=True)
+    # Name of the front-end module containing widget view
+    _view_module = Unicode('riskflow_widgets').tag(sync=True)
+
+    # Name of the front-end module containing widget model
+    _model_module = Unicode('riskflow_widgets').tag(sync=True)
+
+    # Version of the front-end module containing widget view
+    _view_module_version = Unicode('^0.1.0').tag(sync=True)
+    # Version of the front-end module containing widget model
+    _model_module_version = Unicode('^0.1.0').tag(sync=True)
+
+    value = Unicode().tag(sync=True)
+    description = Unicode().tag(sync=True)
+
+
+@widgets.register
+class FlotTree(Tree):
+    _view_name = Unicode('FlotTreeView').tag(sync=True)
+    _model_name = Unicode('FlotTreeModel').tag(sync=True)
+
+    description = Unicode().tag(sync=True)
+    profiles = Unicode().tag(sync=True)

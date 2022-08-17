@@ -7,7 +7,8 @@ module.exports = {};
 
 var loadedModules = [
     require("./tree.js"),
-    require("./table.js")
+    require("./table.js"),
+    require("./flot_tree.js")
 ];
 
 for (var i in loadedModules) {
