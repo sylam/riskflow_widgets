@@ -1,12 +1,10 @@
-var widgets = require('@jupyter-widgets/base');
-var _ = require('lodash');
-var $ = require('jquery');
-var Handsontable = require('handsontable');
-var treebase = require("./tree.js");
+require('./theme/style.css');
+require('flot/lib/jquery.mousewheel');
+require('flot/lib/jquery.event.drag');
+require('flot')
 
-require('flot');
-// require('flot.time');
-// require('flot.navigate');
+var widgets = require('@jupyter-widgets/base');
+var treebase = require("./tree.js");
 
 //setup Flot for drawing stuff
 //useful definition to format the date
@@ -58,6 +56,7 @@ var FlotView = widgets.DOMWidgetView.extend({
         update: function() {
             //var flot = this.$flot;
             var data = $.parseJSON(this.model.get('value'));
+            console.log("update", data);
             this.renderGraph(data);
             return FlotView.__super__.update.apply(this);
         },
@@ -85,10 +84,11 @@ var FlotView = widgets.DOMWidgetView.extend({
 
         renderGraph: function(data) {
             var view = this;
+            console.log("renderGraph");
 
-            $.plot( this.$flot, data,
+            plt = $.plot( view.$flot, data,
             {
-                legend: { show: true, container: '.flotlegend' },
+                legend: { show: true},
                 series: {
                     lines: {
                         show: true
@@ -98,33 +98,36 @@ var FlotView = widgets.DOMWidgetView.extend({
                     },
                     shadowSize: 0
                 },
+                grid: {
+                    hoverable: true
+                },
                 zoom: {
                     interactive: true
                 },
                 pan: {
                     interactive: true
                 }
-            } );
+            });
 
             // Create the Handsontable table.
             this.hot = new Handsontable(view.$table[0],
                 {
-                  data: settabledata(data, false),
-                  // when working in HoT, don't listen for command mode keys
-                  afterSelection: function(){ IPython.keyboard_manager.disable(); },
-                  afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-                  startRows  : 3,
-                  startCols  : 3,
-                  contextMenu: true,
-                  minSpareRows: 1,
-                 // the data changed. `this` is the HoT instance
-                  afterChange: function(changes, source){
+                    data: settabledata(data, false),
+                    // when working in HoT, don't listen for command mode keys
+                    afterSelection: function(){ IPython.keyboard_manager.disable(); },
+                    afterDeselect: function(){ IPython.keyboard_manager.enable(); },
+                    startRows  : 3,
+                    startCols  : 3,
+                    contextMenu: true,
+                    minSpareRows: 1,
+                    // the data changed. `this` is the HoT instance
+                    afterChange: function(changes, source){
                     // don't update if we did the changing!
                     if(source === "loadData"){ return; }
                         view.handle_table_change(this.getData());
-                  },
-                  width : 400,
-                  height : 300
+                    },
+                    width : 400,
+                    height : 300
                 });
         },
 

@@ -1,9 +1,4 @@
 var widgets = require('@jupyter-widgets/base');
-var _ = require('lodash');
-var $ = require('jquery');
-var Handsontable = require('handsontable');
-require('./theme/style.css');
-
 
 // Define the TableView
 var TableView = widgets.DOMWidgetView.extend({

@@ -2,7 +2,7 @@
  z-index:2999 !important;
 }
 
-.widget-box {overflow: visible}
+.widget-box { overflow: visible }
 .widget-text { width: 500px !important; }
 .widget-label { min-width:35ex !important;  }
 .widget-textarea  { width: auto; }

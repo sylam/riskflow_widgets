@@ -1,11 +1,6 @@
-var widgets = require('@jupyter-widgets/base');
-var _ = require('lodash');
-var $ = require('jquery');
-require('./theme/style.css');
 require('jstree');
 
-// base class for jsTree interface - only supports selection
-
+var widgets = require('@jupyter-widgets/base');
 
 var TreeView = widgets.DOMWidgetView.extend({
 

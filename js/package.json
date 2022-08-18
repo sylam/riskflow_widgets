@@ -40,8 +40,10 @@
   "dependencies": {
     "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
     "lodash": "^4.17.4",
+    "jquery": "^3.6.0",
     "jstree": "^3.3.1",
-    "flot": "0.8.3",
+    "flot": "^3.2.0",
+    "three": "^0.97.0",
     "handsontable": "^6.0.1"
   },
   "jupyterlab": {

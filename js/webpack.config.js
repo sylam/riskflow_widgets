@@ -1,4 +1,5 @@
 var path = require('path');
+var webpack = require('webpack');
 var version = require('./package.json').version;
 
 // Custom webpack rules are generally the same for all webpack bundles, hence
@@ -8,6 +9,17 @@ var rules = [
     { test: /\.(jpg|png|gif)$/, loader: "file-loader" }
 ]
 
+// modules used in all the custom widgets
+var plugins = [
+    new webpack.ProvidePlugin({
+        $: "jquery",
+        // flot still uses the name jQuery
+        jQuery: "jquery",
+        THREE: "three",
+        _ : "lodash",
+        Handsontable: 'handsontable'
+    })
+]
 
 module.exports = (env, argv) => {
     var devtool = argv.mode === 'development' ? 'source-map' : false;
@@ -33,6 +45,7 @@ module.exports = (env, argv) => {
         // custom widget.
         // It must be an amd module
             entry: ['./amd-public-path.js', './lib/index.js'],
+            plugins: plugins,
             output: {
                 filename: 'index.js',
                 path: path.resolve(__dirname, '..', 'riskflow_widgets', 'nbextension'),
@@ -56,6 +69,7 @@ module.exports = (env, argv) => {
         // The target bundle is always `dist/index.js`, which is the path
         // required by the custom widget embedder.
             entry: ['./amd-public-path.js', './lib/index.js'],
+            plugins: plugins,
             output: {
                 filename: 'index.js',
                 path: path.resolve(__dirname, 'dist'),
