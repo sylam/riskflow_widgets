@@ -193,59 +193,63 @@ var ThreeView = widgets.DOMWidgetView.extend({
 
     update: function() {
         //console.log("UPDATE");
-        var all_data = $.parseJSON(this.model.get('value'));
-        var self = this;
+        val = this.model.get('value')
 
-        if ( Object.prototype.toString.call( all_data ) === '[object Array]' ) {
-            this.$modify.hide();
-            this.all_data = {null:all_data};
-            this.selection = null;
-        } else {
-            this.$modify.show();
-            this.$all_tenor.children().remove();
+        if (val!="") {
+            var all_data = $.parseJSON(val);
+            var self = this;
 
-            var keys = Object.keys(all_data).sort( function (a,b) {return a - b;} );
+            if ( Object.prototype.toString.call( all_data ) === '[object Array]' ) {
+                this.$modify.hide();
+                this.all_data = {null:all_data};
+                this.selection = null;
+            } else {
+                this.$modify.show();
+                this.$all_tenor.children().remove();
 
-            for (var key in keys)
-            {
-                 $('<option />')
-                    .text(keys[key])
-                    .attr('value_name', keys[key])
-                    .appendTo(self.$all_tenor);
+                var keys = Object.keys(all_data).sort( function (a,b) {return a - b;} );
+
+                for (var key in keys)
+                {
+                     $('<option />')
+                        .text(keys[key])
+                        .attr('value_name', keys[key])
+                        .appendTo(self.$all_tenor);
+                }
+
+                this.$all_tenor.on('change', function (e, data) { self.handle_select_change(e);} );
+                this.all_data = all_data;
+                if (this.selection == null) { this.selection = keys[key]; }
+                this.$all_tenor.val(this.selection);
             }
 
-            this.$all_tenor.on('change', function (e, data) { self.handle_select_change(e);} );
-            this.all_data = all_data;
-            if (this.selection == null) { this.selection = keys[key]; }
-            this.$all_tenor.val(this.selection);
+            //console.log( this.$modify.is(":visible") );
+            var view = this;
+
+            // Create the Handsontable table.
+            this.ht = new Handsontable(view.$table[0],
+                {
+                  data: self.all_data[self.selection],
+                  // when working in HoT, don't listen for command mode keys
+                  afterSelection: function(){ IPython.keyboard_manager.disable(); },
+                  afterDeselect: function(){ IPython.keyboard_manager.enable(); },
+
+                  // the data changed. `this` is the HoT instance
+                  afterChange: function(changes, source) {
+                    // don't update if we did the changing!
+                      if (source === "loadData") { return; }
+                      view.handle_data_change(this.getData());
+                  },
+                  minSpareRows: 1,
+                  minSpareCols : 1,
+                  contextMenu: true,
+                  width:  500,
+                  height: 300
+                });
+
+            this.refresh_grid();
+            this.draw();
         }
-
-        //console.log( this.$modify.is(":visible") );
-        var view = this;
-
-        // Create the Handsontable table.
-        this.ht = new Handsontable(view.$table[0],
-            {
-              data: self.all_data[self.selection],
-              // when working in HoT, don't listen for command mode keys
-              afterSelection: function(){ IPython.keyboard_manager.disable(); },
-              afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-
-              // the data changed. `this` is the HoT instance
-              afterChange: function(changes, source) {
-                // don't update if we did the changing!
-                  if (source === "loadData") { return; }
-                  view.handle_data_change(this.getData());
-              },
-              minSpareRows: 1,
-              minSpareCols : 1,
-              contextMenu: true,
-              width:  500,
-              height: 300
-            });
-
-        this.refresh_grid();
-        this.draw();
 
         return ThreeView.__super__.update.apply(this);
     },

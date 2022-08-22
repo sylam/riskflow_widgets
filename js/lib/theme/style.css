@@ -5,6 +5,7 @@
 .widget-box { overflow: visible }
 .widget-text { width: 500px !important; }
 .widget-label { min-width:35ex !important;  }
+.widget-inline-hbox { align-items: flex-end; }
 .widget-textarea  { width: auto; }
 .widget-tenor-text{width:140px;margin:0 !important}
 .widget-datepicker { width: 380px !important; }
@@ -38,8 +39,8 @@
 .handsonplot { overflow-y: auto; overflow-x: auto; height: 300px; max-width: 500px}
 .handsontable col.rowHeader {  width: 250px; }
 .container { width:95%; }
-.generictree { max-width : 550px; overflow-y: auto; max-height: 700px; padding : 5px; border-style:outset }
+.generictree { max-width : 500px; overflow: auto; max-height: 700px; padding : 5px; border-style:outset }
 .genericframe { padding : 5px; border-style:outset }
 /*.rightframe{ max-width: 1050px; overflow-y: auto; max-height: 700px }*/
-.rightframe{ overflow-y: auto; max-height: 700px }
+.rightframe{ overflow: auto; max-height: 700px }
 .mainframe{background-image:url("ice.png");background-repeat:repeat}

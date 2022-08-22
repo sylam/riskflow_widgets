@@ -58,6 +58,7 @@ class Table(widgets.DOMWidget):
     colHeaders = List([]).tag(sync=True)
     value = Unicode().tag(sync=True)
     description = Unicode().tag(sync=True)
+    settings = Unicode('{}').tag(sync=True)
 
 
 @widgets.register

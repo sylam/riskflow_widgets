@@ -156,7 +156,7 @@ var TreeView = widgets.DOMWidgetView.extend({
             this.model.set('selected', this.get_json_path(obj) );
             if (this.multiselect) {
                 var list_selected = this.$tree.jstree("get_selected", true).map (function (x) {return x["text"];} );
-			    this.model.set ( 'checked', JSON.stringify( list_selected ) );
+			    this.model.set ( 'checked', list_selected );
 			}
             this.touch();
         }

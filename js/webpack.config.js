@@ -9,13 +9,13 @@ var rules = [
     { test: /\.(jpg|png|gif)$/, loader: "file-loader" }
 ]
 
-// modules used in all the custom widgets
+// modules used across the custom widgets
 var plugins = [
     new webpack.ProvidePlugin({
         $: "jquery",
         // flot still uses the name jQuery
         jQuery: "jquery",
-        THREE: "three",
+        // THREE: "three",
         _ : "lodash",
         Handsontable: 'handsontable'
     })

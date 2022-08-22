@@ -1,4 +1,3 @@
-require('./theme/style.css');
 require('flot/lib/jquery.mousewheel');
 require('flot/lib/jquery.event.drag');
 require('flot')
@@ -55,9 +54,17 @@ var FlotView = widgets.DOMWidgetView.extend({
 
         update: function() {
             //var flot = this.$flot;
-            var data = $.parseJSON(this.model.get('value'));
-            console.log("update", data);
-            this.renderGraph(data);
+            val = this.model.get('value');
+
+            if (val != "") {
+                var data = $.parseJSON(val);
+                // console.log("update", data);
+                this.renderGraph(data);
+            }
+            else {
+                console.log("update is null - why?");
+            }
+
             return FlotView.__super__.update.apply(this);
         },
 
@@ -76,7 +83,7 @@ var FlotView = widgets.DOMWidgetView.extend({
                          .appendTo(this.el);
 
             this.$table = $('<div/>')
-                         //.addClass('handsonplot')
+                         .addClass('handsonplot')
                          .appendTo(this.el);
 
             this.displayed.then(_.bind(this.update, this));
@@ -122,8 +129,8 @@ var FlotView = widgets.DOMWidgetView.extend({
                     minSpareRows: 1,
                     // the data changed. `this` is the HoT instance
                     afterChange: function(changes, source){
-                    // don't update if we did the changing!
-                    if(source === "loadData"){ return; }
+                        // don't update if we did the changing!
+                        if(source === "loadData") { return; }
                         view.handle_table_change(this.getData());
                     },
                     width : 400,
