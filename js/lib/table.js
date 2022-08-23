@@ -16,21 +16,24 @@ var TableView = widgets.DOMWidgetView.extend({
         if (!this.loaded)
         {
             var view = this;
-            var settings = $.parseJSON(this.model.get('settings'));
-
-            if (!_.isEmpty(this.colTypes)) {
-                settings = _.extend({
-                    // defaults for tables
-                    colHeaders: view.colHeaders,
-                    columns: view.colTypes,
-                    manualColumnMove: true,
-                    minSpareRows: 1,
-                    startRows  : 1,
-                    startCols : view.colHeaders.length,
-                    width:  400,
-                    height: 200
-                }, settings);
-            }
+            var settings = _.extend({
+                // defaults for tables
+                // set the default columns to always be numeric
+                columns(index) {
+                    return {
+                        type: 'numeric',
+                        numericFormat: {
+                            pattern: '0.0000'
+                        }
+                    }
+                },
+                manualColumnMove: true,
+                minSpareRows: 1,
+                startRows  : 1,
+                startCols : view.colHeaders.length,
+                width:  400,
+                height: 200
+            }, this.settings);
 
             switch (this.label) {
                 case "Matrix":
@@ -39,11 +42,11 @@ var TableView = widgets.DOMWidgetView.extend({
                         data : data,
                         afterSelection: function(){ IPython.keyboard_manager.disable(); },
                         afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-                        colHeaders: view.colHeaders,
-                        rowHeaders: view.colHeaders,
-                        columns: view.colTypes,
-                        startCols : view.colHeaders.length,
-                        startRows : view.colHeaders.length,
+                        colHeaders: settings.colHeaders,
+                        rowHeaders: settings.colHeaders,
+                        columns: settings.columns,
+                        startCols : settings.colHeaders.length,
+                        startRows : settings.colHeaders.length,
                         // the data changed. `this` is the HoT instance
                         afterChange: function(changes, source) {
                         // don't update if we did the changing!
@@ -60,9 +63,9 @@ var TableView = widgets.DOMWidgetView.extend({
                         // when working in HoT, don't listen for command mode keys
                         afterSelection: function(){ IPython.keyboard_manager.disable(); },
                         afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-                        colHeaders: view.colHeaders,
-                        columns: view.colTypes,
-                        startCols : view.colHeaders.length,
+                        colHeaders: settings.colHeaders,
+                        columns: settings.columns,
+                        startCols : settings.colHeaders.length,
                         // the data changed. `this` is the HoT instance
                         afterChange: function(changes, source) {
                             // don't update if we did the changing!
@@ -78,21 +81,21 @@ var TableView = widgets.DOMWidgetView.extend({
                     break;
                 default:
                     // Create the Handsontable table.
-                    this.hot = new Handsontable(view.$table[0], _.extend(
-                        {
-                            data : data,
-                            // when working in HoT, don't listen for command mode keys
-                            afterSelection: function(){ IPython.keyboard_manager.disable(); },
-                            afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-                            // the data changed. `this` is the HoT instance
-                            afterChange: function(changes, source) {
-                                // don't update if we did the changing!
-                                if(source === "loadData"){ return; }
-                                view.handle_table_change(this.getData());
+                    this.hot = new Handsontable(
+                        view.$table[0], _.extend({
+                                data : data,
+                                // when working in HoT, don't listen for command mode keys
+                                afterSelection: function(){ IPython.keyboard_manager.disable(); },
+                                afterDeselect: function(){ IPython.keyboard_manager.enable(); },
+                                // the data changed. `this` is the HoT instance
+                                afterChange: function(changes, source) {
+                                    // don't update if we did the changing!
+                                    if(source === "loadData"){ return; }
+                                    view.handle_table_change(changes, this.getData());
+                                },
                             },
-                        },
-                        settings)
-                    );
+                            settings)
+                        );
             }
             this.loaded = true;
         }
@@ -123,54 +126,39 @@ var TableView = widgets.DOMWidgetView.extend({
         this.$table = $('<div/>')
                      .appendTo(this.el);
 
-        col_types = this.model.get('colTypes');
-        //load up the column type info
-        this.colTypes =  (col_types != "") ? $.parseJSON(col_types) : {};
-
+        this.settings = $.parseJSON(this.model.get('settings'));
         //load up the column header info
-        this.colHeaders = this.model.get('colHeaders');
+        this.colHeaders = ("colHeaders" in this.settings) ? this.settings.colHeaders : [];
         this.label = label;
-
         //update the table
         this.displayed.then(_.bind(this.update, this));
     },
 
-    handle_table_change: function(data) {
-        // JS --> PYTHON UPDATE.
-        var json;
-
-        if (this.selection != null) {
-            if (data!=null) {
-                this.all_data[this.selection] = data;
-            }
-            json = JSON.stringify(this.all_data);
-        } else {
-            json = JSON.stringify(data);
-        }
-
+    handle_table_change: function(changes, data) {
         // Update the model with the JSON string.
-        this.model.set('value', json);
-        // Don't touch this...
-        this.touch();
-
-        // Update the model with the JSON string.
-        if (this.colHeaders.length) {
-
-            if ((data.length>1 && data[0].length==this.colHeaders.length) ||
+        // console.log(changes);
+        if (this.colHeaders.length && (data.length>1)) {
+            // regular field with coltypes
+            if ((data[0].length==this.colHeaders.length) ||
                 this.model.get('description')=="Model Configuration")
             {
                 this.model.set('value', JSON.stringify(data));
                 // Don't touch this...
                 this.touch();
             }
-
-        }
-        if ((data.length>1 && data[0].length==this.colHeaders.length) ||
-            this.model.get('description')=="Model Configuration")
-        {
-            this.model.set('value', JSON.stringify(data));
-            // Don't touch this...
-            this.touch();
+        } else if (data.length>1) {
+            nulls = Array(data[0].length-1).fill(true);
+            data.slice(0, -1).forEach(v=>{
+                v.slice(0, -1).forEach((c,j)=>{
+                    nulls[j]=nulls[j]&(c==null)
+                    })
+                });
+            if (!nulls.some(x=>x))
+            {
+                this.model.set('value', JSON.stringify(data));
+                // Don't touch this...
+                this.touch();
+            }
         }
     }
 });
@@ -185,8 +173,8 @@ var TableModel = widgets.DOMWidgetModel.extend({
         _view_module_version : '0.1.0',
 
         value : '',
-        colTypes : '',
-        colHeaders : [],
+        // colTypes : '',
+        // colHeaders : [],
         settings: '',
         description : ''
     })
