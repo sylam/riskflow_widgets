@@ -9,7 +9,6 @@ var TableView = widgets.DOMWidgetView.extend({
     },
 
     update: function() {
-        //var data = $.parseJSON(this.model.get('value'));
         var val   = this.model.get('value');
         var data = (val==="") ? null : $.parseJSON(val);
 
@@ -19,84 +18,33 @@ var TableView = widgets.DOMWidgetView.extend({
             var settings = _.extend({
                 // defaults for tables
                 // set the default columns to always be numeric
-                columns(index) {
+                columns() {
                     return {
                         type: 'numeric',
                         numericFormat: {
                             pattern: '0.0000'
-                        }
+                        },
+                        validator: Handsontable.validators.NumericValidator
                     }
-                },
-                manualColumnMove: true,
-                minSpareRows: 1,
-                startRows  : 1,
-                startCols : view.colHeaders.length,
-                width:  400,
-                height: 200
+                }
             }, this.settings);
 
-            switch (this.label) {
-                case "Matrix":
-                    this.hot = new Handsontable(view.$table[0], {
-                        // when working in HoT, don't listen for command mode keys
-                        data : data,
-                        afterSelection: function(){ IPython.keyboard_manager.disable(); },
-                        afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-                        colHeaders: settings.colHeaders,
-                        rowHeaders: settings.colHeaders,
-                        columns: settings.columns,
-                        startCols : settings.colHeaders.length,
-                        startRows : settings.colHeaders.length,
-                        // the data changed. `this` is the HoT instance
-                        afterChange: function(changes, source) {
-                        // don't update if we did the changing!
-                            if(source === "loadData"){ return; }
-                            view.handle_table_change(this.getData());
-                          },
-                          width:  700,
-                          height: 300
-                        });
-                    break;
-                case "Model Configuration":
-                    this.hot = new Handsontable(view.$table[0], {
+            this.hot = new Handsontable(
+                view.$table[0], _.extend({
                         data : data,
                         // when working in HoT, don't listen for command mode keys
                         afterSelection: function(){ IPython.keyboard_manager.disable(); },
                         afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-                        colHeaders: settings.colHeaders,
-                        columns: settings.columns,
-                        startCols : settings.colHeaders.length,
                         // the data changed. `this` is the HoT instance
                         afterChange: function(changes, source) {
                             // don't update if we did the changing!
-                            if (source === "loadData") { return; }
-                            view.handle_table_change(this.getData());
-                          },
-                          contextMenu: true,
-                          minSpareRows  : 1,
-                          width:  700,
-                          height: 300
-                        });
-                        this.hasContext = true;
-                    break;
-                default:
-                    // Create the Handsontable table.
-                    this.hot = new Handsontable(
-                        view.$table[0], _.extend({
-                                data : data,
-                                // when working in HoT, don't listen for command mode keys
-                                afterSelection: function(){ IPython.keyboard_manager.disable(); },
-                                afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-                                // the data changed. `this` is the HoT instance
-                                afterChange: function(changes, source) {
-                                    // don't update if we did the changing!
-                                    if(source === "loadData"){ return; }
-                                    view.handle_table_change(changes, this.getData());
-                                },
-                            },
-                            settings)
-                        );
-            }
+                            if(source === "loadData"){ return; }
+                            view.handle_table_change(changes, this.getData());
+                        },
+                    },
+                    settings)
+            );
+
             this.loaded = true;
         }
         else
@@ -119,7 +67,6 @@ var TableView = widgets.DOMWidgetView.extend({
                             .appendTo(this.el);
 
             //always initialize with the label
-
             this.$label.text(label);
         }
 
@@ -136,7 +83,7 @@ var TableView = widgets.DOMWidgetView.extend({
 
     handle_table_change: function(changes, data) {
         // Update the model with the JSON string.
-        // console.log(changes);
+        // should check the changes array and send that - more efficient - TODO!
         if (this.colHeaders.length && (data.length>1)) {
             // regular field with coltypes
             if ((data[0].length==this.colHeaders.length) ||
@@ -155,8 +102,16 @@ var TableView = widgets.DOMWidgetView.extend({
                 });
             if (!nulls.some(x=>x))
             {
-                this.model.set('value', JSON.stringify(data));
-                // Don't touch this...
+                // remove the last row and column
+                /*
+                Should not be necessary to add the extra parseFloat
+                HoT already has its columns set to numeric - this might be bug in HoT
+                */
+                // console.log('changes', changes);
+                this.model.set('value', JSON.stringify(
+                    data.slice(0,-1).map(v=>v.slice(0,-1).map(k=>parseFloat(k))))
+                    // data.slice(0,-1).map(v=>v.slice(0,-1)))
+                    );
                 this.touch();
             }
         }
@@ -173,8 +128,6 @@ var TableModel = widgets.DOMWidgetModel.extend({
         _view_module_version : '0.1.0',
 
         value : '',
-        // colTypes : '',
-        // colHeaders : [],
         settings: '',
         description : ''
     })

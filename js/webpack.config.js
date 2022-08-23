@@ -15,7 +15,6 @@ var plugins = [
         $: "jquery",
         // flot still uses the name jQuery
         jQuery: "jquery",
-        // THREE: "three",
         _ : "lodash",
         Handsontable: 'handsontable'
     })

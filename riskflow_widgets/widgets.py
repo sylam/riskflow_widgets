@@ -54,8 +54,6 @@ class Table(widgets.DOMWidget):
     # Version of the front-end module containing widget model
     _model_module_version = Unicode('^0.1.0').tag(sync=True)
 
-    # colTypes = Unicode().tag(sync=True)
-    # colHeaders = List([]).tag(sync=True)
     value = Unicode().tag(sync=True)
     description = Unicode().tag(sync=True)
     settings = Unicode('{}').tag(sync=True)
@@ -87,22 +85,3 @@ class FlotTree(Tree):
 
     description = Unicode().tag(sync=True)
     profiles = Unicode().tag(sync=True)
-
-
-# @widgets.register
-# class Three(widgets.DOMWidget):
-#     _view_name = Unicode('ThreeView').tag(sync=True)
-#     _model_name = Unicode('ThreeModel').tag(sync=True)
-#     # Name of the front-end module containing widget view
-#     _view_module = Unicode('riskflow_widgets').tag(sync=True)
-#
-#     # Name of the front-end module containing widget model
-#     _model_module = Unicode('riskflow_widgets').tag(sync=True)
-#
-#     # Version of the front-end module containing widget view
-#     _view_module_version = Unicode('^0.1.0').tag(sync=True)
-#     # Version of the front-end module containing widget model
-#     _model_module_version = Unicode('^0.1.0').tag(sync=True)
-#
-#     value = Unicode().tag(sync=True)
-#     description = Unicode().tag(sync=True)
