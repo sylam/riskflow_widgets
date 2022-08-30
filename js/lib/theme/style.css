@@ -4,43 +4,22 @@
 
 .widget-box { overflow: visible }
 .widget-text { width: 500px !important; }
-.widget-label { min-width:35ex }
+.widget-label { align-self: baseline; min-width:35ex }
 .widget-inline-hbox { align-items: flex-end; }
 .widget-textarea  { width: auto; }
 .widget-tenor-text{width:140px;margin:0 !important}
 .widget-datepicker { width: 380px !important; }
 .widget-select { width: 450px !important; }
 .widget-tenorlistbox{width:140px;margin-bottom:0}
-
-.flot-container {
-	box-sizing: border-box;
-	width: 850px;
-	height: 450px;
-	padding: 20px 15px 15px 15px;
-	margin: 15px auto 30px auto;
-	border: 1px solid #ddd;
-	background: #fff;
-	background: linear-gradient(#f6f6f6 0, #fff 50px);
-	background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
-	background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
-	background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
-	background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
-	box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-	-o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-	-ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-	-moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-	-webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-}
 .flotwrapper { position: relative; width: 800px; margin: auto; margin-top: 20px; font-size: 12pt; }
 .flottitle { color: #888; margin-left: 50px; }
 .flotgraph { position: relative; margin-top: 20px; }
 .flotlegend { position: absolute; right: 0; }
-.flotplot { width: 540px; height: 300px; }
-.handsonplot { overflow-y: auto; overflow-x: auto; height: 300px; max-width: 500px}
+.flotplot { width: 300px; height: 300px; }
+.handsonplot { overflow: auto; height: 300px; max-width: 300px}
 .handsontable col.rowHeader {  width: 250px; }
 .container { width:95%; }
 .generictree { max-width : 500px; overflow: auto; max-height: 700px; padding : 5px; border-style:outset }
 .genericframe { padding : 5px; border-style:outset }
-/*.rightframe{ max-width: 1050px; overflow-y: auto; max-height: 700px }*/
 .rightframe{ overflow: auto; max-height: 700px }
 .mainframe{background-image:url("ice.png");background-repeat:repeat}

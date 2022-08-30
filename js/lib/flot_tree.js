@@ -133,7 +133,7 @@ var FlotView = widgets.DOMWidgetView.extend({
                         if(source === "loadData") { return; }
                         view.handle_table_change(this.getData());
                     },
-                    width : 400,
+                    width : 300,
                     height : 300
                 });
         },
