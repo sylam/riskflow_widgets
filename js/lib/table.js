@@ -15,19 +15,6 @@ var TableView = widgets.DOMWidgetView.extend({
         if (!this.loaded)
         {
             var view = this;
-            var settings = _.extend({
-                // defaults for tables
-                // set the default columns to always be numeric
-                columns() {
-                    return {
-                        type: 'numeric',
-                        numericFormat: {
-                            pattern: '0.0000'
-                        },
-                        validator: Handsontable.validators.NumericValidator
-                    }
-                }
-            }, this.settings);
 
             this.hot = new Handsontable(
                 view.$table[0], _.extend({
@@ -42,7 +29,7 @@ var TableView = widgets.DOMWidgetView.extend({
                             view.handle_table_change(changes, this.getData());
                         },
                     },
-                    settings)
+                    this.settings)
             );
 
             this.loaded = true;
@@ -94,23 +81,27 @@ var TableView = widgets.DOMWidgetView.extend({
                 this.touch();
             }
         } else if (data.length>1) {
-            nulls = Array(data[0].length-1).fill(true);
-            data.slice(0, -1).forEach(v=>{
-                v.slice(0, -1).forEach((c,j)=>{
-                    nulls[j]=nulls[j]&(c==null)
+            // check that row and colulm headers are populated and
+            // there is at least 1 non null value per row/col
+            nulls_col = data[0].slice(1,-1).map(v=>v!=null)
+            nulls_row = true
+            data.slice(1, -1).forEach((r,i)=>{
+                nulls_row = r[0]!=null & nulls_row & r.slice(1).some(x=>x);
+                r.slice(1).forEach((c,j)=>{
+                    nulls_col[j]=nulls_col[j]&(c==null)
                     })
                 });
-            if (!nulls.some(x=>x))
+            if (!nulls_col.some(x=>x) && nulls_row)
             {
+                // console.log('here');
                 // remove the last row and column
                 /*
-                Should not be necessary to add the extra parseFloat
-                HoT already has its columns set to numeric - this might be bug in HoT
+                Force the data to be floating point - note I could ask HoT to
+                parse the columns as numeric but then manual maintenance of the columns setting
+                is needed.
                 */
-                // console.log('changes', changes);
                 this.model.set('value', JSON.stringify(
                     data.slice(0,-1).map(v=>v.slice(0,-1).map(k=>parseFloat(k))))
-                    // data.slice(0,-1).map(v=>v.slice(0,-1)))
                     );
                 this.touch();
             }

@@ -90,36 +90,117 @@ class FlotTree(Tree):
     profiles = Unicode().tag(sync=True)
 
 
-class Three(widgets.HBox):
-    '''Fake widget built around HBox - just shows a label, a plot and a table for editing'''
+def to_json(string):
+    """converts a string to json - skips the whitespace for a smaller output"""
+    return json.dumps(string, separators=(',', ':'))
 
+
+class Three(widgets.HBox):
     def __init__(self, description):
         self.description = widgets.Label(value=description)
         self.plot = k3d.plot(
             axes=['log(moneyness)', 'expiry', 'vol(\%)'],
-            camera_rotate_speed=3.0
+            # menu_visibility=False,
+            camera_rotate_speed=3.0,
         )
-        self.mesh = None
+        # set the plot layout to match the table below
+        self.plot.layout.max_width = '600px'
 
-        self.data = Table(description='', settings=json.dumps({
-            'width': 500, 'height': 300, 'contextMenu': True, 'minSpareRows': 1, 'minSpareCols': 1
+        self.mesh = None
+        self.points = None
+        self.plot_label = None
+        self.data = Table(description='', settings=to_json({
+            'width': 600, 'height': 300, 'contextMenu': True, 'minSpareRows': 1, 'minSpareCols': 1
         }))
+
+        self.add_button = widgets.Button(
+            description='Add Tenor', tooltip='Add a new vol surface for a new tenor')
+        self.del_button = widgets.Button(
+            description='Remove Tenor', tooltip='Delete vol surface for this tenor')
+        self.dropdown = widgets.Combobox(
+            description='Tenor:', placeholder='Choose Tenor', options=[],
+            ensure_option=False)
+        self.dropdown.layout.max_width='360px'
+        self.tenor = None
+
+        self.selector = widgets.HBox(children=[self.add_button, self.del_button, self.dropdown])
+        self.selector.layout.visibility = 'hidden'
+        self.selector.layout.max_width = '600px'
+
+        self.add_button.on_click(self.add_button_clicked)
+        self.del_button.on_click(self.del_button_clicked)
+        self.dropdown.observe(self.change_selection, 'value')
+        self.obj = None
 
         super().__init__(
             children=[
                 self.description,
-                widgets.VBox(children=[self.plot, self.data])
+                widgets.VBox(children=[self.selector, self.plot, self.data])
             ]
         )
+
+    def change_selection(self, change):
+        if change.new in self.obj:
+            matrix = self.obj[change.new]
+            self.data.value = to_json(matrix)
+            self.update_plot(matrix)
+            self.tenor = self.dropdown.value
+            self.plot_label.text = 'Tenor: {}'.format(self.tenor)
+            self.dropdown.unobserve(self.change_selection, 'value')
+            self.dropdown.value = ''
+            self.dropdown.observe(self.change_selection, 'value')
+
+    def add_button_clicked(self, b):
+        val = self.dropdown.value
+        if val:
+            try:
+                val = self.dropdown.value
+                self.dropdown.options = tuple([str(x) for x in sorted(
+                    [float(x) for x in (self.dropdown.options + (val,))])])
+                self.tenor = val
+                self.plot_label.text = 'Tenor: {}'.format(self.tenor)
+                self.obj[val] = json.loads(riskflow_jupyter.rf.fields.default['Surface'])
+                matrix = self.obj[val]
+                self.data.value = to_json(matrix)
+                self.update_plot(matrix)
+            except:
+                print('could not cast value to float')
+
+    def del_button_clicked(self, b):
+        val = self.dropdown.value if self.dropdown.value else self.tenor
+        if val in self.dropdown.options:
+            self.dropdown.options = tuple([x for x in self.dropdown.options if x != val])
+            print('inside - about to del', self.obj.keys())
+            del self.obj[val]
+            print('inside - about to del', self.obj.keys())
+            if self.dropdown.options:
+                self.tenor = self.dropdown.options[0]
+                matrix = self.obj[self.tenor]
+            else:
+                self.tenor = ''
+                matrix = [[]]
+
+            self.dropdown.value = self.tenor
+            print('inside - after del', self.obj.keys())
+            self.data.value = to_json(matrix)
+            self.update_plot(matrix)
+        print("del Button clicked.", val)
 
     def observe(self, handler, prop, type='change'):
 
         def make_plot_fn():
             def update_plot(change):
-                # call the original handler first
-                handler(change)
-                # now update the plot with the new data
-                self.update_plot(json.loads(change['new']))
+                # now update the table with the new data
+                table_obj = json.loads(change.new)
+                # store the result if this is a 3d obj
+                if self.tenor is not None:
+                    self.obj[self.tenor] = table_obj
+                # call the original handler with the modified change event
+                handler({'name': change.name, 'old': change.old, 'new': self.value,
+                         'owner': self, 'type': change.type})
+                # check if we have a valid table obj
+                if np.all([len(x) > 1 for x in table_obj[1:]]):
+                    self.update_plot(table_obj)
 
             return update_plot
 
@@ -155,16 +236,26 @@ class Three(widgets.HBox):
 
         surface = np.array(e)
         expiry = [p[0] for p in json_list[1:]]
-        return expiry, moneyness, np.array([np.interp(
+        return e, expiry, moneyness, np.array([np.interp(
             moneyness, surface[surface[:, 1] == x][:, 0], surface[surface[:, 1] == x][:, 2]) for x in expiry])
 
     def update_plot(self, json_list):
-        e, moneyness, vol = Three.interpolate_surface(json_list)
-        scale = 2 / np.log(2)
-        m = scale * np.log(moneyness)
-        v = vol * 100
+        raw_points, expiry, moneyness, vol = Three.interpolate_surface(json_list)
+        raw_vertices = np.array(raw_points, dtype=np.float32)
 
-        U, V = np.meshgrid(m, e)
+        if min(moneyness) > 0:
+            scale = 2 / np.log(2)
+            m = scale * np.log(moneyness)
+            raw_vertices[:, 0] = scale * np.log(raw_vertices[:, 0])
+        else:
+            m = np.array(moneyness) * 100.0
+            raw_vertices[:,0] = 100.0*raw_vertices[:,0]
+            self.plot.axes = ['moneyness (bps)', 'expiry', 'vol(\%)']
+
+        v = vol * 100
+        raw_vertices[:, 2] = 100.0 * raw_vertices[:, 2]
+
+        U, V = np.meshgrid(m, expiry)
         vertices = np.dstack([U, V, v]).astype(np.float32).reshape(-1, 3)
         indices = Three.make_faces_vectorized1(*v.shape).astype(np.uint32)
         if self.mesh is None:
@@ -172,8 +263,14 @@ class Three(widgets.HBox):
                 vertices, indices, flat_shading=False, attribute=v,
                 side='double', color_map=k3d.basic_color_maps.Reds, color_range=[v.min(), v.max()]
             )
+            self.points = k3d.points(raw_vertices, point_size=0.1, shader='3d')
+            self.plot_label = k3d.text2d('Volatility', position=(0, 0))
+            # add the plots
+            self.plot += self.points
             self.plot += self.mesh
+            self.plot += self.plot_label
         else:
+            self.points.vertices = raw_vertices
             self.mesh.attribute = v
             self.mesh.color_range = [v.min(), v.max()]
             self.mesh.vertices = vertices
@@ -181,9 +278,22 @@ class Three(widgets.HBox):
 
     @property
     def value(self):
-        return self.data.value
+        return to_json(self.obj)
 
     @value.setter
     def value(self, json_string):
-        self.data.value = json_string
-        self.update_plot(json.loads(json_string))
+        self.obj = json.loads(json_string)
+        if isinstance(self.obj, dict):
+            self.selector.layout.visibility = 'visible'
+            self.dropdown.options = tuple(self.obj.keys())
+            selection = self.dropdown.options[0]
+            self.dropdown.value = selection
+            matrix = self.obj[selection]
+            data_value = to_json(matrix)
+        else:
+            self.selector.layout.visibility = 'hidden'
+            data_value = json_string
+            matrix = self.obj
+
+        self.data.value = data_value
+        self.update_plot(matrix)

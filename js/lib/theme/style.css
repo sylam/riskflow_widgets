@@ -4,7 +4,7 @@
 
 .widget-box { overflow: visible }
 .widget-text { width: 500px !important; }
-.widget-label { min-width:35ex !important;  }
+.widget-label { min-width:35ex }
 .widget-inline-hbox { align-items: flex-end; }
 .widget-textarea  { width: auto; }
 .widget-tenor-text{width:140px;margin:0 !important}
