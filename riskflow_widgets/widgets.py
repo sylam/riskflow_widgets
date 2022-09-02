@@ -4,7 +4,12 @@ import numpy as np
 import ipywidgets as widgets
 from traitlets import Unicode, List
 
-# See js/lib/tree.js for the frontend counterpart to this file.
+# See js/lib/*.js for the frontend counterpart to this file.
+
+def to_json(string):
+    """converts a string to json - skips the whitespace for a smaller output"""
+    return json.dumps(string, separators=(',', ':'))
+
 
 @widgets.register
 class Tree(widgets.DOMWidget):
@@ -79,20 +84,8 @@ class Flot(widgets.DOMWidget):
 
     value = Unicode().tag(sync=True)
     description = Unicode().tag(sync=True)
-
-
-@widgets.register
-class FlotTree(Tree):
-    _view_name = Unicode('FlotTreeView').tag(sync=True)
-    _model_name = Unicode('FlotTreeModel').tag(sync=True)
-
-    description = Unicode().tag(sync=True)
-    profiles = Unicode().tag(sync=True)
-
-
-def to_json(string):
-    """converts a string to json - skips the whitespace for a smaller output"""
-    return json.dumps(string, separators=(',', ':'))
+    hot_settings = Unicode('{}').tag(sync=True)
+    flot_settings = Unicode('{}').tag(sync=True)
 
 
 class Three(widgets.HBox):
@@ -110,7 +103,8 @@ class Three(widgets.HBox):
         self.points = None
         self.plot_label = None
         self.data = Table(description='', settings=to_json({
-            'width': 600, 'height': 300, 'contextMenu': True, 'minSpareRows': 1, 'minSpareCols': 1
+            'width': 600, 'height': 300, 'contextMenu': True,
+            'minSpareRows': 1, 'minSpareCols': 1
         }))
 
         self.add_button = widgets.Button(
@@ -196,8 +190,8 @@ class Three(widgets.HBox):
                 if self.tenor is not None:
                     self.obj[self.tenor] = table_obj
                 # call the original handler with the modified change event
-                handler({'name': change.name, 'old': change.old, 'new': self.value,
-                         'owner': self, 'type': change.type})
+                handler({'name': change.name, 'old': change.old,
+                         'new': self.value,'owner': self, 'type': change.type})
                 # check if we have a valid table obj
                 if np.all([len(x) > 1 for x in table_obj[1:]]):
                     self.update_plot(table_obj)
