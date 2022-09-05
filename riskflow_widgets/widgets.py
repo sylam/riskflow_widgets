@@ -3,6 +3,8 @@ import json
 import numpy as np
 import ipywidgets as widgets
 from traitlets import Unicode, List
+# use the FileChooser widget from ipyfilechooser to select JSON (can change this later)
+from ipyfilechooser import FileChooser
 
 # See js/lib/*.js for the frontend counterpart to this file.
 

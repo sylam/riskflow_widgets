@@ -47,6 +47,7 @@ setup_args = dict(
     include_package_data=True,
     install_requires=[
         'ipywidgets>=7.6.0',
+        'ipyfilechooser>=0.6.0',
         'k3d>=2.14.5'
     ],
     packages=find_packages(),
