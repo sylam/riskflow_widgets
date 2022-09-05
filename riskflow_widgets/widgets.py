@@ -91,7 +91,7 @@ class Flot(widgets.DOMWidget):
 
 
 class Three(widgets.HBox):
-    def __init__(self, description):
+    def __init__(self, description, value='[[0.0,1.0], [1.0,0.0]]'):
         self.description = widgets.Label(value=description)
         self.plot = k3d.plot(
             axes=['log(moneyness)', 'expiry', 'vol(\%)'],
@@ -134,6 +134,7 @@ class Three(widgets.HBox):
                 widgets.VBox(children=[self.selector, self.plot, self.data])
             ]
         )
+        self.value = value
 
     def change_selection(self, change):
         if change.new in self.obj:
