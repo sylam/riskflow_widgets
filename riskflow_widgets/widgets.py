@@ -8,9 +8,22 @@ from ipyfilechooser import FileChooser
 
 # See js/lib/*.js for the frontend counterpart to this file.
 
-def to_json(string):
-    """converts a string to json - skips the whitespace for a smaller output"""
-    return json.dumps(string, separators=(',', ':'))
+def to_json(p_object):
+    """
+    converts a python object to json.
+    skips the whitespace for a smaller output and converts numpy arrays back to lists
+    """
+    class NpEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, np.integer):
+                return int(obj)
+            if isinstance(obj, np.floating):
+                return float(obj)
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            return json.JSONEncoder.default(self, obj)
+
+    return json.dumps(p_object, separators=(',', ':'), cls=NpEncoder)
 
 
 @widgets.register
