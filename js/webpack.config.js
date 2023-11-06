@@ -6,8 +6,8 @@ var version = require('./package.json').version;
 // stored in a separate local variable.
 var rules = [
     { test: /\.css$/, use: ['style-loader', 'css-loader']},
-    { test: /\.(jpg|png|gif)$/, loader: "file-loader" }
-]
+    { test: /\.(jpg|png|gif)$/i, type: 'asset/resource' }
+];
 
 // modules used across the custom widgets
 var plugins = [
@@ -18,7 +18,7 @@ var plugins = [
         _ : "lodash",
         Handsontable: 'handsontable'
     })
-]
+];
 
 module.exports = (env, argv) => {
     var devtool = argv.mode === 'development' ? 'source-map' : false;

@@ -1,15 +1,15 @@
 var widgets = require('@jupyter-widgets/base');
 
 // Define the TableView
-var TableView = widgets.DOMWidgetView.extend({
+export class TableView extends widgets.DOMWidgetView {
 
-    initialize: function(options) {
-        TableView.__super__.initialize.apply(this, arguments);
+    initialize(options) {
+        super.initialize(options);
         this.loaded = false;
-    },
+    }
 
-    update: function() {
-        var val   = this.model.get('value');
+    update() {
+        var val  = this.model.get('value');
         var data = (val==="") ? null : $.parseJSON(val);
 
         if (!this.loaded)
@@ -39,10 +39,10 @@ var TableView = widgets.DOMWidgetView.extend({
             this.hot.loadData(data);
         }
 
-        return TableView.__super__.update.apply(this);
-    },
+        return super.update();
+    }
 
-    render: function() {
+    render() {
 
         var label = this.model.get('description');
 
@@ -66,9 +66,9 @@ var TableView = widgets.DOMWidgetView.extend({
         this.label = label;
         //update the table
         this.displayed.then(_.bind(this.update, this));
-    },
+    }
 
-    handle_table_change: function(changes, data) {
+    handle_table_change(changes, data) {
         // Update the model with the JSON string.
         // should check the changes array and send that - more efficient - TODO!
         if (this.colHeaders.length && (data.length>1)) {
@@ -107,24 +107,25 @@ var TableView = widgets.DOMWidgetView.extend({
             }
         }
     }
-});
+}
 
-var TableModel = widgets.DOMWidgetModel.extend({
-    defaults: _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
-        _model_name: "TableModel",
-        _view_name: "TableView",
-        _model_module : 'riskflow_widgets',
-        _view_module : 'riskflow_widgets',
-        _model_module_version : '0.1.0',
-        _view_module_version : '0.1.0',
+export const TABLE_WIDGET_VERSION = '0.1.1';
 
-        value : '',
-        settings: '',
-        description : ''
-    })
-});
+export class TableModel extends widgets.DOMWidgetModel {
+    defaults() {
+        return {
+            ...super.defaults(),
+            _model_name: "TableModel",
+            _view_name: "TableView",
+            _model_module : 'riskflow_widgets',
+            _view_module : 'riskflow_widgets',
+            _model_module_version : TABLE_WIDGET_VERSION,
+            _view_module_version : TABLE_WIDGET_VERSION,
 
-module.exports = {
-    TableModel: TableModel,
-    TableView: TableView
-};
+            value : '',
+            settings: '',
+            description : ''
+        };
+    }
+}
+

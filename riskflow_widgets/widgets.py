@@ -43,9 +43,9 @@ class Tree(widgets.DOMWidget):
     _model_module = Unicode('riskflow_widgets').tag(sync=True)
 
     # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^0.1.0').tag(sync=True)
+    _view_module_version = Unicode('^0.1.1').tag(sync=True)
     # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^0.1.0').tag(sync=True)
+    _model_module_version = Unicode('^0.1.1').tag(sync=True)
 
     # Widget specific property.
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`
@@ -58,6 +58,7 @@ class Tree(widgets.DOMWidget):
     deleted = List([]).tag(sync=True)
     plugins = List([]).tag(sync=True)
     checked = List([]).tag(sync=True)
+    ignore = List([]).tag(sync=True)
     settings = Unicode('').tag(sync=True)
 
 
@@ -73,9 +74,9 @@ class Table(widgets.DOMWidget):
     _model_module = Unicode('riskflow_widgets').tag(sync=True)
 
     # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^0.1.0').tag(sync=True)
+    _view_module_version = Unicode('^0.1.1').tag(sync=True)
     # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^0.1.0').tag(sync=True)
+    _model_module_version = Unicode('^0.1.1').tag(sync=True)
 
     value = Unicode().tag(sync=True)
     description = Unicode().tag(sync=True)
@@ -93,9 +94,9 @@ class Flot(widgets.DOMWidget):
     _model_module = Unicode('riskflow_widgets').tag(sync=True)
 
     # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^0.1.0').tag(sync=True)
+    _view_module_version = Unicode('^0.1.1').tag(sync=True)
     # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^0.1.0').tag(sync=True)
+    _model_module_version = Unicode('^0.1.1').tag(sync=True)
 
     value = Unicode().tag(sync=True)
     description = Unicode().tag(sync=True)
@@ -169,7 +170,7 @@ class Three(widgets.HBox):
                     [float(x) for x in (self.dropdown.options + (val,))])])
                 self.tenor = val
                 self.plot_label.text = 'Tenor: {}'.format(self.tenor)
-                self.obj[val] = json.loads(riskflow_jupyter.rf.fields.default['Surface'])
+                self.obj[val] = json.loads('[[0.0,1.0], [1.0,0.0]]')
                 matrix = self.obj[val]
                 self.data.value = to_json(matrix)
                 self.update_plot(matrix)

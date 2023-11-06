@@ -1,6 +1,6 @@
 {
   "name": "riskflow_widgets",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Custom jupyter widgets for riskflow",
   "author": "Shuaib Osman",
   "main": "lib/index.js",
@@ -31,16 +31,19 @@
   },
   "devDependencies": {
     "css-loader": "^0.28.7",
-    "file-loader": "^1.1.6",
+    "file-loader": "^6.2.0",
     "@jupyterlab/builder": "^3.0.0",
     "style-loader": "^0.18.2",
     "webpack": "^5",
     "rimraf": "^2.6.1"
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
+    "@jupyter-widgets/base": "^2 || ^3 || ^4 || ^5 || ^6",
     "lodash": "^4.17.4",
-    "jstree": "^3.3.1"
+    "jquery": "^3.6.0",
+    "jstree": "^3.3.1",
+    "flot": "^3.2.0",
+    "handsontable": "^6.2.2"
   },
   "jupyterlab": {
     "extension": "lib/labplugin",

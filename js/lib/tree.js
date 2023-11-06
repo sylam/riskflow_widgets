@@ -1,39 +1,39 @@
-require('jstree');
-
 var widgets = require('@jupyter-widgets/base');
+require('jstree');
+require('./theme/style.css');
 
-var TreeView = widgets.DOMWidgetView.extend({
+export class TreeView extends widgets.DOMWidgetView {
 
-    initialize: function(options) {
-        TreeView.__super__.initialize.apply(this, arguments);
+    initialize(options) {
+        super.initialize(options);
         this.loaded = false;
-    },
+    }
 
-    generateActionMethod: function (subtree, $node, node_data, obj_type)
+    generateActionMethod(subtree, $node, node_data, obj_type)
     {
         return function(data) {
             $node = subtree.create_node($node, {"type":node_data, "data":obj_type});
             subtree.edit($node, obj_type+".");
         };
-    },
+    }
 
-    generateContextMethod: function (subtree, $node, obj_types)
+    generateContextMethod(subtree, $node, obj_types)
     {
         var submenus = {};
         for (var key in obj_types) {
-          if (obj_types.hasOwnProperty(key)) {
-            submenus[key] = {
-                                "separator_before": false,
-                                "separator_after": false,
-                                "label" : key,
-                                "action" : this.generateActionMethod(subtree, $node, obj_types[key], key)
-                            };
-          }
+            if (obj_types.hasOwnProperty(key)) {
+                submenus[key] = {
+                                    "separator_before": false,
+                                    "separator_after": false,
+                                    "label" : key,
+                                    "action" : this.generateActionMethod(subtree, $node, obj_types[key], key)
+                                };
+            }
         }
         return submenus;
-    },
+    }
 
-    perform_update: function ( tree, data, type_data ) {
+    perform_update( tree, data, type_data ) {
         var settings = $.parseJSON(this.model.get('settings'));
         var plugins = this.model.get('plugins');
         var self = this;
@@ -41,10 +41,11 @@ var TreeView = widgets.DOMWidgetView.extend({
         this.multiselect = plugins.includes('checkbox');
 
         tree.jstree({
-            "core"  : {"data":data, "check_callback" : true},
-            "types" : type_data,
-            "plugins" : plugins,
-            "contextmenu" : plugins.includes('contextmenu') ? {
+            core  : {data: data, check_callback : true},
+            types : type_data,
+            plugins : plugins,
+            themes: {icons: true},
+            contextmenu : plugins.includes('contextmenu') ? {
                  "items": function ($node) {
                     var subtree = tree.jstree(true);
                     var create = {};
@@ -60,6 +61,28 @@ var TreeView = widgets.DOMWidgetView.extend({
                             }
                         }
                     };
+                    var toggle = {
+                        "Toggle": {
+                            "separator_before"	: true,
+                            "label": "Toggle Status",
+                                "action": function() {
+                                    subtree.get_selected(true).map (
+                                        function(x) {
+                                            x.data.ignore = x.data.hasOwnProperty('ignore') ? x.data.ignore : false;
+                                            x.data.ignore = !x.data.ignore;
+                                            var node_dom = subtree.get_node(x,true).children('.jstree-anchor')
+                                            if (x.data.ignore)
+                                            {
+                                                node_dom.addClass('jstree-disabled').attr('aria-disabled', true);
+                                            } else {
+                                                node_dom.removeClass('jstree-disabled').attr('aria-disabled', false);
+                                            }
+                                        }
+                                    );
+                                    subtree.trigger('enable_node', { 'node' : $node });
+                                }
+                            }
+                        };
                     var del = {
                                 "Delete": {
                                     "separator_before"	: true,
@@ -75,10 +98,18 @@ var TreeView = widgets.DOMWidgetView.extend({
                             items = create;
                             break;
                         case "group":
-                            items = $.extend({}, create, del);
+                            if (settings['events'].includes('ignore')) {
+                               items = $.extend({}, create, toggle, del);
+                            } else {
+                                items = $.extend({}, create, del);
+                            }
                             break;
                         default:
-                            items = del;
+                            if (settings['events'].includes('ignore')) {
+                               items = $.extend({}, toggle, del);
+                            } else {
+                                items = del;
+                            }
                     }
                     return items;
                 }
@@ -91,12 +122,17 @@ var TreeView = widgets.DOMWidgetView.extend({
         if (settings['events'].includes('delete')){
             tree.on('delete.jstree', this.handle_delete.bind(this));
         }
+        if (settings['events'].includes('ignore')){
+            tree.on('enable_node.jstree', this.handle_toggle.bind(this));
+            // make sure we draw ignored nodes correctly
+            tree.on('open_node.jstree', this.handle_open.bind(this));
+        }
         if (this.multiselect){
             tree.on('deselect_node.jstree', this.handle_deselect.bind(this))
         }
-    },
+    }
 
-    update: function() {
+    update() {
         if (!this.loaded && this.model.get('value')) {
             var tree = this.$tree;
             var data = $.parseJSON(this.model.get('value'));
@@ -114,10 +150,10 @@ var TreeView = widgets.DOMWidgetView.extend({
         }
 
         //We can only create the tree once via an update
-        return TreeView.__super__.update.apply(this);
-    },
+        return super.update();
+    }
 
-    render: function() {
+    render() {
         // Create the control.
         this.$search  = $('<input type="text" />')
             .addClass('input')
@@ -132,14 +168,14 @@ var TreeView = widgets.DOMWidgetView.extend({
 
         //call update
         this.displayed.then(_.bind(this.update, this));
-    },
+    }
 
-    get_json_path: function(obj) {
+    get_json_path(obj) {
         var path = this.$tree.jstree("get_path", obj.node);
         return path.slice(1);
-    },
+    }
 
-    handle_search: function(event, obj) {
+    handle_search(event, obj) {
         var self = this;
 
         if (this.to) { clearTimeout(this.to); }
@@ -147,10 +183,10 @@ var TreeView = widgets.DOMWidgetView.extend({
             var v = self.$search.val();
             self.$tree.jstree(true).search(v);
         }, 250);
-    },
+    }
 
     // Callback for when the user makes a new selection
-    handle_select: function(event, obj) {
+    handle_select(event, obj) {
         if (obj!=null) {
             //console.log(obj.node);
             this.model.set('selected', this.get_json_path(obj) );
@@ -160,19 +196,46 @@ var TreeView = widgets.DOMWidgetView.extend({
 			}
             this.touch();
         }
-    },
+    }
 
-    handle_deselect: function(event, obj) {
+    handle_open(event, obj) {
+        if (obj != null) {
+            var self = this;
+            obj.node.children.forEach(function(child) {
+                var node = self.$tree.jstree('get_node', child);
+                var $anchor = $(self.$tree.jstree('get_node', child, true)).children('.jstree-anchor');
+                if (node.data.hasOwnProperty('ignore') ? node.data.ignore : false) {
+                    $anchor.addClass('jstree-disabled').attr('aria-disabled', true);
+                }
+            });
+        }
+    }
+
+    handle_deselect(event, obj) {
         if (obj!=null) {
-            // note this that sh
             var list_selected = this.$tree.jstree("get_selected", true).map (function (x) {return x["text"];} );
             this.model.set ( 'checked', list_selected );
             this.touch();
         }
-    },
+    }
+
+    handle_toggle(event, obj) {
+        if (obj!=null) {
+            var self = this;
+            var path = this.$tree.jstree("get_selected", true).map (
+                function(x) {
+                        var w = self.$tree.jstree('get_path',x);
+                        w[0] = x.data.hasOwnProperty('ignore') ? x.data.ignore : false;
+                        return w;
+                    }
+                );
+            this.model.set('ignore', path);
+            this.touch();
+        }
+    }
 
     // Callback for when the user creates a new node
-    handle_tree_change: function(event, obj) {
+    handle_tree_change(event, obj) {
         if (obj!=null) {
             if ( obj.node.text.indexOf(obj.node.data)!=0 )
             {
@@ -182,39 +245,40 @@ var TreeView = widgets.DOMWidgetView.extend({
             this.model.set('created', this.get_json_path(obj) );
             this.touch();
         }
-    },
+    }
 
     // Callback for when the user deletes a nod
-    handle_delete: function(event, obj) {
+    handle_delete(event, obj) {
         if (obj!=null) {
             //console.log('Delete',obj.node);
             this.model.set('deleted', this.get_json_path(obj));
             this.touch();
         }
     }
-});
+}
 
-var TreeModel = widgets.DOMWidgetModel.extend({
-    defaults: _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
-        _model_name: "TreeModel",
-        _view_name: "TreeView",
-        _model_module : 'riskflow_widgets',
-        _view_module : 'riskflow_widgets',
-        _model_module_version : '0.1.0',
-        _view_module_version : '0.1.0',
+export const TREE_WIDGET_VERSION = '0.1.1';
 
-        value : '',
-        type_data : '',
-        selected : [],
-        created : [],
-        deleted : [],
-        plugins: [],
-        checked: [],
-        settings: ''
-    })
-});
+export class TreeModel extends widgets.DOMWidgetModel {
+    defaults() {
+        return {
+            ...super.defaults(),
+            _model_name: "TreeModel",
+            _view_name: "TreeView",
+            _model_module : 'riskflow_widgets',
+            _view_module : 'riskflow_widgets',
+            _model_module_version : TREE_WIDGET_VERSION,
+            _view_module_version : TREE_WIDGET_VERSION,
 
-module.exports = {
-    TreeModel: TreeModel,
-    TreeView: TreeView
-};
+            value : '',
+            type_data : '',
+            selected : [],
+            created : [],
+            deleted : [],
+            plugins: [],
+            checked: [],
+            ignore: [],
+            settings: ''
+        };
+    }
+}

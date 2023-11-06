@@ -1,11 +1,12 @@
+var widgets = require('@jupyter-widgets/base');
+
 require('flot/lib/jquery.mousewheel');
 require('flot/lib/jquery.event.drag');
 require('flot')
 
-var widgets = require('@jupyter-widgets/base');
-
 //setup Flot for drawing stuff
 //useful definition to format the date
+
 function yyyymmdd(date) {
    var yyyy = date.getFullYear().toString();
    var mm = (date.getMonth()+1).toString(); // getMonth() is zero-based
@@ -48,11 +49,11 @@ function gettabledata(colheaders, ht) {
     return columns;
 }
 
-var FlotView = widgets.DOMWidgetView.extend({
+export class FlotView extends widgets.DOMWidgetView {
 
-        update: function() {
+        update() {
             //var flot = this.$flot;
-            val = this.model.get('value');
+            var val = this.model.get('value');
 
             if (val != "") {
                 var data = $.parseJSON(val);
@@ -63,18 +64,21 @@ var FlotView = widgets.DOMWidgetView.extend({
                 console.log("update is null - why?");
             }
 
-            return FlotView.__super__.update.apply(this);
-        },
+            return super.update();
+        }
 
-        render: function(){
+        render() {
             //console.log("render");
             this.el.classList.add('widget-inline-hbox');
 
-            this.$label = $('<div />')
-                            .addClass('widget-label')
-                            .appendTo(this.el);
-            //always initialize with the label
-            this.$label.text(this.model.get('description'));
+            if (this.model.get('description')!='')
+            {
+                this.$label = $('<div />')
+                                .addClass('widget-label')
+                                .appendTo(this.el);
+                //always initialize with the label
+                this.$label.text(this.model.get('description'));
+            }
 
             this.$flot = $('<div/>')
                          .addClass('flotplot')
@@ -86,17 +90,17 @@ var FlotView = widgets.DOMWidgetView.extend({
 
             this.colheaders = [];
             this.displayed.then(_.bind(this.update, this));
-        },
+        }
 
-        renderGraph: function(data) {
-            console.log("renderGraph");
+        renderGraph(data) {
+            // console.log("renderGraph");
 
             var view = this;
             var flot_settings = $.parseJSON(this.model.get('flot_settings'));
             var hot_settings = $.parseJSON(this.model.get('hot_settings'));
 
-            table_data = settabledata(data, _.get(flot_settings, 'xaxis.mode')=='time');
-            hot_settings = _.extend({
+            var table_data = settabledata(data, _.get(flot_settings, 'xaxis.mode')=='time');
+            var hot_settings = _.extend({
                 // defaults for tables
                 manualColumnMove: true,
                 contextMenu: false,
@@ -130,7 +134,17 @@ var FlotView = widgets.DOMWidgetView.extend({
                 }
             }, flot_settings);
 
-            plt = $.plot( view.$flot, data, flot_settings);
+            if (_.get(flot_settings, 'xaxis.mode')=='time') {
+                flot_settings = _.extend({
+                yaxis : {
+                            tickFormatter: function numberWithCommas(x) {
+                                return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
+                            }
+                        }
+                }
+                , flot_settings);
+            }
+            var plt = $.plot( view.$flot, data, flot_settings);
             // Create the Handsontable table.
             this.hot = new Handsontable(view.$table[0], _.extend(
                 {
@@ -146,11 +160,11 @@ var FlotView = widgets.DOMWidgetView.extend({
                     }
                 }, hot_settings)
             );
-        },
+        }
 
         //events: {"change": "handle_table_change"},
 
-        handle_table_change: function(event) {
+        handle_table_change(event) {
             // Get the data, and serialize it in JSON.
             var data = gettabledata(this.colheaders, this.hot);
             // Update the model with the JSON string.
@@ -158,26 +172,26 @@ var FlotView = widgets.DOMWidgetView.extend({
             // Don't touch this...
             this.touch();
         }
+}
 
-});
+export const FLOT_WIDGET_VERSION = '0.1.1';
 
-var FlotModel = widgets.DOMWidgetModel.extend({
-    defaults: _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
-        _model_name: 'FlotModel',
-        _view_name: 'FlotView',
-        _model_module : 'riskflow_widgets',
-        _view_module : 'riskflow_widgets',
-        _model_module_version : '0.1.0',
-        _view_module_version : '0.1.0',
+export class FlotModel extends widgets.DOMWidgetModel {
+    defaults() {
+        return  {
+            ...super.defaults(),
+            _model_name: 'FlotModel',
+            _view_name: 'FlotView',
+            _model_module : 'riskflow_widgets',
+            _view_module : 'riskflow_widgets',
+            _model_module_version : FLOT_WIDGET_VERSION,
+            _view_module_version : FLOT_WIDGET_VERSION,
 
-        value : '',
-        hot_settings: '',
-        flot_settings: '',
-        description : ''
-    })
-});
+            value : '',
+            hot_settings: '',
+            flot_settings: '',
+            description : ''
+        };
+    }
+}
 
-module.exports = {
-    FlotView: FlotView,
-    FlotModel: FlotModel
-};

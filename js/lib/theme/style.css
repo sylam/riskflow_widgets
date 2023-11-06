@@ -31,11 +31,11 @@
 .flotwrapper { position: relative; width: 800px; margin: auto; margin-top: 20px; font-size: 12pt; }
 .flottitle { color: #888; margin-left: 50px; }
 .flotgraph { position: relative; margin-top: 20px; }
-.flotplot { width: 350px; height: 300px; }
+.flotplot { width: 400px; height: 300px; }
 .handsonplot { overflow: auto; height: 300px; max-width: 300px}
 .handsontable col.rowHeader {  width: 250px; }
 .container { width:95%; }
 .generictree { max-width : 450px; overflow: auto; max-height: 700px; padding : 5px; border-style:outset }
 .genericframe { padding : 5px; border-style:outset }
 .rightframe{ overflow: auto; max-height: 700px }
-.mainframe{background-image:url("ice.png");background-repeat:repeat}
+.mainframe{ background-image:url('ice.png'); background-repeat:repeat }
