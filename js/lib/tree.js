@@ -257,7 +257,7 @@ export class TreeView extends widgets.DOMWidgetView {
     }
 }
 
-export const TREE_WIDGET_VERSION = '0.1.1';
+export const TREE_WIDGET_VERSION = '0.2.1';
 
 export class TreeModel extends widgets.DOMWidgetModel {
     defaults() {

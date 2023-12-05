@@ -43,9 +43,9 @@ class Tree(widgets.DOMWidget):
     _model_module = Unicode('riskflow_widgets').tag(sync=True)
 
     # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^0.1.1').tag(sync=True)
+    _view_module_version = Unicode('^0.2.1').tag(sync=True)
     # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^0.1.1').tag(sync=True)
+    _model_module_version = Unicode('^0.2.1').tag(sync=True)
 
     # Widget specific property.
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`
@@ -74,9 +74,9 @@ class Table(widgets.DOMWidget):
     _model_module = Unicode('riskflow_widgets').tag(sync=True)
 
     # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^0.1.1').tag(sync=True)
+    _view_module_version = Unicode('^0.2.1').tag(sync=True)
     # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^0.1.1').tag(sync=True)
+    _model_module_version = Unicode('^0.2.1').tag(sync=True)
 
     value = Unicode().tag(sync=True)
     description = Unicode().tag(sync=True)
@@ -94,9 +94,9 @@ class Flot(widgets.DOMWidget):
     _model_module = Unicode('riskflow_widgets').tag(sync=True)
 
     # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^0.1.1').tag(sync=True)
+    _view_module_version = Unicode('^0.2.1').tag(sync=True)
     # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^0.1.1').tag(sync=True)
+    _model_module_version = Unicode('^0.2.1').tag(sync=True)
 
     value = Unicode().tag(sync=True)
     description = Unicode().tag(sync=True)

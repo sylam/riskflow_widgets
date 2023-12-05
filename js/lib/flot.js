@@ -174,7 +174,7 @@ export class FlotView extends widgets.DOMWidgetView {
         }
 }
 
-export const FLOT_WIDGET_VERSION = '0.1.1';
+export const FLOT_WIDGET_VERSION = '0.2.1';
 
 export class FlotModel extends widgets.DOMWidgetModel {
     defaults() {

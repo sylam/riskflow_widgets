@@ -109,7 +109,7 @@ export class TableView extends widgets.DOMWidgetView {
     }
 }
 
-export const TABLE_WIDGET_VERSION = '0.1.1';
+export const TABLE_WIDGET_VERSION = '0.2.1';
 
 export class TableModel extends widgets.DOMWidgetModel {
     defaults() {
