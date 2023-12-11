@@ -81,10 +81,10 @@ export class TableView extends widgets.DOMWidgetView {
                 this.touch();
             }
         } else if (data.length>1) {
-            // check that row and colulm headers are populated and
+            // check that row and column headers are populated and
             // there is at least 1 non null value per row/col
-            nulls_col = data[0].slice(1,-1).map(v=>v!=null)
-            nulls_row = true
+            var nulls_col = data[0].slice(1,-1).map(v=>v!=null)
+            var nulls_row = true
             data.slice(1, -1).forEach((r,i)=>{
                 nulls_row = r[0]!=null & nulls_row & r.slice(1).some(x=>x);
                 r.slice(1).forEach((c,j)=>{

@@ -6,6 +6,7 @@ from traitlets import Unicode, List
 # use the FileChooser widget from ipyfilechooser to select JSON (can change this later)
 from ipyfilechooser import FileChooser
 
+
 # See js/lib/*.js for the frontend counterpart to this file.
 
 def to_json(p_object):
@@ -13,6 +14,7 @@ def to_json(p_object):
     converts a python object to json.
     skips the whitespace for a smaller output and converts numpy arrays back to lists
     """
+
     class NpEncoder(json.JSONEncoder):
         def default(self, obj):
             if isinstance(obj, np.integer):
@@ -130,7 +132,7 @@ class Three(widgets.HBox):
         self.dropdown = widgets.Combobox(
             description='Tenor:', placeholder='Choose Tenor', options=[],
             ensure_option=False)
-        self.dropdown.layout.max_width='360px'
+        self.dropdown.layout.max_width = '360px'
         self.tenor = None
 
         self.selector = widgets.HBox(children=[self.add_button, self.del_button, self.dropdown])
@@ -208,7 +210,7 @@ class Three(widgets.HBox):
                     self.obj[self.tenor] = table_obj
                 # call the original handler with the modified change event
                 handler({'name': change.name, 'old': change.old,
-                         'new': self.value,'owner': self, 'type': change.type})
+                         'new': change.new, 'owner': self, 'type': change.type})
                 # check if we have a valid table obj
                 if np.all([len(x) > 1 for x in table_obj[1:]]):
                     self.update_plot(table_obj)
@@ -260,7 +262,7 @@ class Three(widgets.HBox):
             raw_vertices[:, 0] = scale * np.log(raw_vertices[:, 0])
         else:
             m = np.array(moneyness) * 100.0
-            raw_vertices[:,0] = 100.0*raw_vertices[:,0]
+            raw_vertices[:, 0] = 100.0 * raw_vertices[:, 0]
             self.plot.axes = ['moneyness (bps)', 'expiry', 'vol(\%)']
 
         v = vol * 100
