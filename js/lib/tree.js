@@ -1,4 +1,5 @@
 var widgets = require('@jupyter-widgets/base');
+var _ = require('lodash');
 require('jstree');
 require('./theme/style.css');
 
@@ -34,7 +35,7 @@ export class TreeView extends widgets.DOMWidgetView {
     }
 
     perform_update( tree, data, type_data ) {
-        var settings = $.parseJSON(this.model.get('settings'));
+        var settings = JSON.parse(this.model.get('settings'));
         var plugins = this.model.get('plugins');
         var self = this;
         // check if we need to return all selected
@@ -135,9 +136,9 @@ export class TreeView extends widgets.DOMWidgetView {
     update() {
         if (!this.loaded && this.model.get('value')) {
             var tree = this.$tree;
-            var data = $.parseJSON(this.model.get('value'));
+            var data = JSON.parse(this.model.get('value'));
             // console.log('value', data);
-            var type_data = $.parseJSON(this.model.get('type_data'));
+            var type_data = JSON.parse(this.model.get('type_data'));
             this.perform_update(tree, data, type_data);
 
             this.$search

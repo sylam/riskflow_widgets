@@ -1,4 +1,6 @@
 var widgets = require('@jupyter-widgets/base');
+var _ = require('lodash');
+var Handsontable = require('handsontable');
 
 // Define the TableView
 export class TableView extends widgets.DOMWidgetView {
@@ -10,7 +12,7 @@ export class TableView extends widgets.DOMWidgetView {
 
     update() {
         var val  = this.model.get('value');
-        var data = (val==="") ? null : $.parseJSON(val);
+        var data = (val==="") ? null : JSON.parse(val);
 
         if (!this.loaded)
         {
@@ -20,8 +22,8 @@ export class TableView extends widgets.DOMWidgetView {
                 view.$table[0], _.extend({
                         data : data,
                         // when working in HoT, don't listen for command mode keys
-                        afterSelection: function(){ IPython.keyboard_manager.disable(); },
-                        afterDeselect: function(){ IPython.keyboard_manager.enable(); },
+                        // afterSelection: function(){ IPython.keyboard_manager.disable(); },
+                        // afterDeselect: function(){ IPython.keyboard_manager.enable(); },
                         // the data changed. `this` is the HoT instance
                         afterChange: function(changes, source) {
                             // don't update if we did the changing!
@@ -60,7 +62,7 @@ export class TableView extends widgets.DOMWidgetView {
         this.$table = $('<div/>')
                      .appendTo(this.el);
 
-        this.settings = $.parseJSON(this.model.get('settings'));
+        this.settings = JSON.parse(this.model.get('settings'));
         //load up the column header info
         this.colHeaders = ("colHeaders" in this.settings) ? this.settings.colHeaders : [];
         this.label = label;

@@ -10,6 +10,10 @@ To install use pip:
 
     $ pip install riskflow_widgets
 
+Note that for jupyterlab>3.0 you must disable the context menu i.e.
+
+    $ jupyter labextension disable @jupyterlab/application-extension:context-menu
+
 For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
 
     $ git clone https://github.com/sylam/riskflow_widgets.git

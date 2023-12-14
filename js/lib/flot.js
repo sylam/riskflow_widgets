@@ -1,4 +1,8 @@
+import $ from "expose-loader?exposes=$,jQuery!jquery";
+
 var widgets = require('@jupyter-widgets/base');
+var _ = require('lodash');
+var Handsontable = require('handsontable');
 
 require('flot/lib/jquery.mousewheel');
 require('flot/lib/jquery.event.drag');
@@ -56,7 +60,7 @@ export class FlotView extends widgets.DOMWidgetView {
             var val = this.model.get('value');
 
             if (val != "") {
-                var data = $.parseJSON(val);
+                var data = JSON.parse(val);
                 // console.log("update", data);
                 this.renderGraph(data);
             }
@@ -96,8 +100,8 @@ export class FlotView extends widgets.DOMWidgetView {
             // console.log("renderGraph");
 
             var view = this;
-            var flot_settings = $.parseJSON(this.model.get('flot_settings'));
-            var hot_settings = $.parseJSON(this.model.get('hot_settings'));
+            var flot_settings = JSON.parse(this.model.get('flot_settings'));
+            var hot_settings = JSON.parse(this.model.get('hot_settings'));
 
             var table_data = settabledata(data, _.get(flot_settings, 'xaxis.mode')=='time');
             var hot_settings = _.extend({
@@ -150,8 +154,8 @@ export class FlotView extends widgets.DOMWidgetView {
                 {
                     data: table_data.slice(1),
                     // when working in HoT, don't listen for command mode keys
-                    afterSelection: function(){ IPython.keyboard_manager.disable(); },
-                    afterDeselect: function(){ IPython.keyboard_manager.enable(); },
+                    // afterSelection: function(){ IPython.keyboard_manager.disable(); },
+                    // afterDeselect: function(){ IPython.keyboard_manager.enable(); },
                     // the data changed. `this` is the HoT instance
                     afterChange: function(changes, source){
                         // don't update if we did the changing!

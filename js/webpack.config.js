@@ -6,7 +6,13 @@ var version = require('./package.json').version;
 // stored in a separate local variable.
 var rules = [
     { test: /\.css$/, use: ['style-loader', 'css-loader']},
-    { test: /\.(jpg|png|gif)$/i, type: 'asset/resource' }
+    { test: /\.(jpg|png|gif)$/i, type: 'asset/resource' },
+    { test: require.resolve('jquery'),
+        loader: "expose-loader",
+        options: {
+          exposes: ["$", "jQuery"],
+        },
+    }
 ];
 
 // modules used across the custom widgets
