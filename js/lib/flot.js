@@ -55,127 +55,127 @@ function gettabledata(colheaders, ht) {
 
 export class FlotView extends widgets.DOMWidgetView {
 
-        update() {
-            //var flot = this.$flot;
-            var val = this.model.get('value');
+    update() {
+        //var flot = this.$flot;
+        var val = this.model.get('value');
 
-            if (val != "") {
-                var data = JSON.parse(val);
-                // console.log("update", data);
-                this.renderGraph(data);
-            }
-            else {
-                console.log("update is null - why?");
-            }
-
-            return super.update();
+        if (val != "") {
+            var data = JSON.parse(val);
+            // console.log("update", data);
+            this.renderGraph(data);
+        }
+        else {
+            console.log("update is null - why?");
         }
 
-        render() {
-            //console.log("render");
-            this.el.classList.add('widget-inline-hbox');
+        return super.update();
+    }
 
-            if (this.model.get('description')!='')
-            {
-                this.$label = $('<div />')
-                                .addClass('widget-label')
-                                .appendTo(this.el);
-                //always initialize with the label
-                this.$label.text(this.model.get('description'));
-            }
+    render() {
+        //console.log("render");
+        this.el.classList.add('widget-inline-hbox');
 
-            this.$flot = $('<div/>')
-                         .addClass('flotplot')
-                         .appendTo(this.el);
-
-            this.$table = $('<div/>')
-                         .addClass('handsonplot')
-                         .appendTo(this.el);
-
-            this.colheaders = [];
-            this.displayed.then(_.bind(this.update, this));
+        if (this.model.get('description')!='')
+        {
+            this.$label = $('<div />')
+                            .addClass('widget-label')
+                            .appendTo(this.el);
+            //always initialize with the label
+            this.$label.text(this.model.get('description'));
         }
 
-        renderGraph(data) {
-            // console.log("renderGraph");
+        this.$flot = $('<div/>')
+                     .addClass('flotplot')
+                     .appendTo(this.el);
 
-            var view = this;
-            var flot_settings = JSON.parse(this.model.get('flot_settings'));
-            var hot_settings = JSON.parse(this.model.get('hot_settings'));
+        this.$table = $('<div/>')
+                     .addClass('handsonplot')
+                     .appendTo(this.el);
 
-            var table_data = settabledata(data, _.get(flot_settings, 'xaxis.mode')=='time');
-            var hot_settings = _.extend({
-                // defaults for tables
-                manualColumnMove: true,
-                contextMenu: false,
-                minSpareRows: 1,
-                width:  300,
-                height: 300
-            }, hot_settings);
-            //set the column headers
-            this.colheaders = table_data[0];
-            hot_settings['colHeaders'] = this.colheaders;
-            // now setup flot
+        this.colheaders = [];
+        this.displayed.then(_.bind(this.update, this));
+    }
+
+    renderGraph(data) {
+        // console.log("renderGraph");
+
+        var view = this;
+        var flot_settings = JSON.parse(this.model.get('flot_settings'));
+        var hot_settings = JSON.parse(this.model.get('hot_settings'));
+
+        var table_data = settabledata(data, _.get(flot_settings, 'xaxis.mode')=='time');
+        var hot_settings = _.extend({
+            // defaults for tables
+            manualColumnMove: true,
+            contextMenu: false,
+            minSpareRows: 1,
+            width:  300,
+            height: 300
+        }, hot_settings);
+        //set the column headers
+        this.colheaders = table_data[0];
+        hot_settings['colHeaders'] = this.colheaders;
+        // now setup flot
+        flot_settings = _.extend({
+            legend: { show: true, position: "ne"},
+            series: {
+                lines: {
+                    show: true
+                },
+                points: {
+                    show: true
+                },
+                shadowSize: 0
+            },
+            grid: {
+                hoverable: true
+            },
+            zoom: {
+                interactive: true
+            },
+            pan: {
+                interactive: true
+            }
+        }, flot_settings);
+
+        if (_.get(flot_settings, 'xaxis.mode')=='time') {
             flot_settings = _.extend({
-                legend: { show: true, position: "ne"},
-                series: {
-                    lines: {
-                        show: true
-                    },
-                    points: {
-                        show: true
-                    },
-                    shadowSize: 0
-                },
-                grid: {
-                    hoverable: true
-                },
-                zoom: {
-                    interactive: true
-                },
-                pan: {
-                    interactive: true
-                }
-            }, flot_settings);
-
-            if (_.get(flot_settings, 'xaxis.mode')=='time') {
-                flot_settings = _.extend({
-                yaxis : {
-                            tickFormatter: function numberWithCommas(x) {
-                                return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
-                            }
+            yaxis : {
+                        tickFormatter: function numberWithCommas(x) {
+                            return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
                         }
-                }
-                , flot_settings);
-            }
-            var plt = $.plot( view.$flot, data, flot_settings);
-            // Create the Handsontable table.
-            this.hot = new Handsontable(view.$table[0], _.extend(
-                {
-                    data: table_data.slice(1),
-                    // when working in HoT, don't listen for command mode keys
-                    // afterSelection: function(){ IPython.keyboard_manager.disable(); },
-                    // afterDeselect: function(){ IPython.keyboard_manager.enable(); },
-                    // the data changed. `this` is the HoT instance
-                    afterChange: function(changes, source){
-                        // don't update if we did the changing!
-                        if(source === "loadData") { return; }
-                        view.handle_table_change(this.getData());
                     }
-                }, hot_settings)
-            );
+            }
+            , flot_settings);
         }
+        var plt = $.plot( view.$flot, data, flot_settings);
+        // Create the Handsontable table.
+        this.hot = new Handsontable(view.$table[0], _.extend(
+            {
+                data: table_data.slice(1),
+                // when working in HoT, don't listen for command mode keys
+                // afterSelection: function(){ IPython.keyboard_manager.disable(); },
+                // afterDeselect: function(){ IPython.keyboard_manager.enable(); },
+                // the data changed. `this` is the HoT instance
+                afterChange: function(changes, source){
+                    // don't update if we did the changing!
+                    if(source === "loadData") { return; }
+                    view.handle_table_change(this.getData());
+                }
+            }, hot_settings)
+        );
+    }
 
-        //events: {"change": "handle_table_change"},
+    //events: {"change": "handle_table_change"},
 
-        handle_table_change(event) {
-            // Get the data, and serialize it in JSON.
-            var data = gettabledata(this.colheaders, this.hot);
-            // Update the model with the JSON string.
-            this.model.set('value', JSON.stringify(data));
-            // Don't touch this...
-            this.touch();
-        }
+    handle_table_change(event) {
+        // Get the data, and serialize it in JSON.
+        var data = gettabledata(this.colheaders, this.hot);
+        // Update the model with the JSON string.
+        this.model.set('value', JSON.stringify(data));
+        // Don't touch this...
+        this.touch();
+    }
 }
 
 export const FLOT_WIDGET_VERSION = '0.2.1';

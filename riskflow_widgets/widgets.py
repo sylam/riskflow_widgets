@@ -2,9 +2,10 @@ import k3d
 import json
 import numpy as np
 import ipywidgets as widgets
-from traitlets import Unicode, List
+from traitlets import Unicode, List, Bool, Dict, default
+
 # use the FileChooser widget from ipyfilechooser to select JSON (can change this later)
-from ipyfilechooser import FileChooser
+# from ipyfilechooser import FileChooser
 
 
 # See js/lib/*.js for the frontend counterpart to this file.
@@ -26,6 +27,25 @@ def to_json(p_object):
             return json.JSONEncoder.default(self, obj)
 
     return json.dumps(p_object, separators=(',', ':'), cls=NpEncoder)
+
+
+@widgets.register
+class FileDragUpload(widgets.DOMWidget):
+    _model_name = Unicode('FileDragUploadModel').tag(sync=True)
+    _view_name = Unicode('FileDragUploadView').tag(sync=True)
+    # Name of the front-end module containing widget view
+    _view_module = Unicode('riskflow_widgets').tag(sync=True)
+    # Name of the front-end module containing widget model
+    _model_module = Unicode('riskflow_widgets').tag(sync=True)
+    accept = Unicode(help='File types to accept, empty string for all').tag(sync=True)
+    disabled = Bool(help='Enable or disable button').tag(sync=True)
+    icon = Unicode('upload', help="Font-awesome icon name, without the 'fa-' prefix.").tag(sync=True)
+    error = Unicode(help='Error message').tag(sync=True)
+    value = Dict(help='The file upload value').tag(sync=True, echo_update=False)
+
+    @default('description')
+    def _default_description(self):
+        return 'Upload'
 
 
 @widgets.register
