@@ -1,11 +1,9 @@
 import k3d
 import json
 import numpy as np
+import datetime as dt
 import ipywidgets as widgets
-from traitlets import Unicode, List, Bool, Dict, default
-
-# use the FileChooser widget from ipyfilechooser to select JSON (can change this later)
-# from ipyfilechooser import FileChooser
+from traitlets import Unicode, List, Bool, Bunch, default
 
 
 # See js/lib/*.js for the frontend counterpart to this file.
@@ -29,6 +27,39 @@ def to_json(p_object):
     return json.dumps(p_object, separators=(',', ':'), cls=NpEncoder)
 
 
+def _deserialize_single_file(js):
+    uploaded_file = Bunch()
+    for attribute in ['name', 'type', 'size', 'content']:
+        uploaded_file[attribute] = js[attribute]
+    uploaded_file['last_modified'] = dt.datetime.fromtimestamp(
+        js['last_modified'] / 1000,
+        tz=dt.timezone.utc
+    )
+    return uploaded_file
+
+
+def _deserialize_value(js, _):
+    return [_deserialize_single_file(entry) for entry in js]
+
+
+def _serialize_single_file(uploaded_file):
+    js = {}
+    for attribute in ['name', 'type', 'size', 'content']:
+        js[attribute] = uploaded_file[attribute]
+    js['last_modified'] = int(uploaded_file['last_modified'].timestamp() * 1000)
+    return js
+
+
+def _serialize_value(value, _):
+    return [_serialize_single_file(entry) for entry in value]
+
+
+_value_serialization = {
+    'from_json': _deserialize_value,
+    'to_json': _serialize_value
+}
+
+
 @widgets.register
 class FileDragUpload(widgets.DOMWidget):
     _model_name = Unicode('FileDragUploadModel').tag(sync=True)
@@ -37,11 +68,16 @@ class FileDragUpload(widgets.DOMWidget):
     _view_module = Unicode('riskflow_widgets').tag(sync=True)
     # Name of the front-end module containing widget model
     _model_module = Unicode('riskflow_widgets').tag(sync=True)
+    # Version of the front-end module containing widget view
+    _view_module_version = Unicode('^0.2.1').tag(sync=True)
+    # Version of the front-end module containing widget model
+    _model_module_version = Unicode('^0.2.1').tag(sync=True)
     accept = Unicode(help='File types to accept, empty string for all').tag(sync=True)
     disabled = Bool(help='Enable or disable button').tag(sync=True)
     icon = Unicode('upload', help="Font-awesome icon name, without the 'fa-' prefix.").tag(sync=True)
     error = Unicode(help='Error message').tag(sync=True)
-    value = Dict(help='The file upload value').tag(sync=True, echo_update=False)
+    value = List(help='The file upload value').tag(
+        sync=True, echo_update=False, **_value_serialization)
 
     @default('description')
     def _default_description(self):
@@ -91,10 +127,8 @@ class Table(widgets.DOMWidget):
     _model_name = Unicode('TableModel').tag(sync=True)
     # Name of the front-end module containing widget view
     _view_module = Unicode('riskflow_widgets').tag(sync=True)
-
     # Name of the front-end module containing widget model
     _model_module = Unicode('riskflow_widgets').tag(sync=True)
-
     # Version of the front-end module containing widget view
     _view_module_version = Unicode('^0.2.1').tag(sync=True)
     # Version of the front-end module containing widget model
@@ -111,10 +145,8 @@ class Flot(widgets.DOMWidget):
     _model_name = Unicode('FlotModel').tag(sync=True)
     # Name of the front-end module containing widget view
     _view_module = Unicode('riskflow_widgets').tag(sync=True)
-
     # Name of the front-end module containing widget model
     _model_module = Unicode('riskflow_widgets').tag(sync=True)
-
     # Version of the front-end module containing widget view
     _view_module_version = Unicode('^0.2.1').tag(sync=True)
     # Version of the front-end module containing widget model

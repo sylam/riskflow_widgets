@@ -5,7 +5,7 @@ var widgets = require('@jupyter-widgets/base');
 
 function makepromise(files) {
     const promisesFile = [];
-    files.forEach((file) => promisesFile.push(
+    _.forEach(files, (file) => promisesFile.push(
         new Promise((resolve, reject) => {
             const fileReader = new FileReader();
             fileReader.onload = () => {
@@ -30,20 +30,33 @@ function makepromise(files) {
     return promisesFile;
 }
 
+export const DRAG_WIDGET_VERSION = '0.2.1';
+
 export class FileDragUploadModel extends widgets.DOMWidgetModel  {
     defaults() {
         return {
             ...super.defaults(),
             _model_name: 'FileDragUploadModel',
             _view_name: 'FileDragUploadView',
+            _model_module : 'riskflow_widgets',
+            _view_module : 'riskflow_widgets',
+            _model_module_version : DRAG_WIDGET_VERSION,
+            _view_module_version : DRAG_WIDGET_VERSION,
             accept: '',
+            tooltip: 'Click or drag a file here',
             description: 'Upload',
             disabled: false,
             icon: 'upload',
-            value: [], // has type Array<IFileUploaded>
+            value: [],
             error: '',
         };
     }
+
+    static serializers = {
+        ...widgets.DOMWidgetModel.serializers,
+        // use a dummy serializer for value to circumvent the default serializer.
+        value: { serialize: (x) => x },
+    };
 }
 
 export class FileDragUploadView extends widgets.DOMWidgetView {
